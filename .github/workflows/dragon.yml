@@ -1,21 +1,19 @@
 name: Cowsay Dragon
 
 on:
-    workflow_dispatch:
+  workflow_dispatch:
 
 jobs:
   dragon-job:
-    runs-on: self_hosted
+    runs-on: self-hosted
     steps:
-
+      - name: Update package lists
+        run: sudo apt-get update
       - name: Install cowsay program
         run: sudo apt-get install cowsay -y
-
       - name: Execute cowsay CMD
-        run: cowsay -f dragon "Run for cover, I am a Dragon" >> dragon.txt
-
+        run: /usr/games/cowsay -f dragon "Run for cover, I am a Dragon" >> dragon.txt
       - name: Test File Exists
         run: grep -i "dragon" dragon.txt
-
       - name: Read File
         run: cat dragon.txt

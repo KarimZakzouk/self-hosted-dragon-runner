@@ -1,1 +1,17 @@
-terraform
+terraform/lambda/.env
+terraform/lambda/runner_manager.zip
+terraform/.terraform
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/.terraform.lock.hcl
+
+# Environment files
+.env
+.env.local
+*.env
+
+# AWS and sensitive files
+*.pem
+*.key
+terraform.tfvars
+terraform.tfstate*
