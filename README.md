@@ -1,85 +1,78 @@
 # 🐉 Self-Hosted GitHub Actions Runner
 
-Automated EC2 GitHub Actions runner management via Lambda functions.
+> **Always-on EC2 GitHub Actions runner for reliable CI/CD workflows**
+
+Transform your CI/CD pipeline with a dedicated, always-available self-hosted runner on AWS EC2. Perfect for projects requiring custom environments, specific software, consistent performance, or enhanced security controls.
+
+## ✨ Features
+
+- �️ **Always Available** - Dedicated EC2 instance ready for your workflows 24/7
+- ⚡ **Instant Execution** - No startup delays, workflows run immediately
+- 🔧 **Persistent Environment** - Keep tools, dependencies, and cache between runs
+- � **Consistent Performance** - Predictable resources and execution times
+- 🏗️ **Infrastructure as Code** - Terraform-managed, repeatable deployments
+- 🔒 **Secure** - Isolated EC2 instance with proper security groups
 
 ## 🚀 How to Use
 
-### Method 1: Simple Way (GitHub UI)
+### Setup Your Always-On Runner
 
-**Start Runner:**
-1. Go to **GitHub → Settings → Actions → Runners**
-2. Click **"New self-hosted runner"**
-3. Follow GitHub's setup instructions on your server
+Perfect for consistent CI/CD workflows with zero startup time.
 
-**Stop Runner:**
-1. Go to **GitHub → Settings → Actions → Runners**
-2. Click the **"..."** next to your runner
-3. Click **"Remove"**
-
-**Re-run Job:**
-1. Go to **GitHub → Actions**
-2. Click on your workflow
-3. Click **"Re-run jobs"** or **"Run workflow"**
-
-### Method 2: Advanced Way (API - What I Built)
-
-**Start Runner:**
-```bash
-curl -X POST https://0xwfoeelwa.execute-api.us-east-1.amazonaws.com/lambda/create
-```
-✅ Response: `{"message": "Runner created", "instanceId": "i-xxxxxxxxxxxxxxxxx"}`
-
-**Stop Runner:**
-```bash
-curl -X POST https://0xwfoeelwa.execute-api.us-east-1.amazonaws.com/lambda/destroy
-```
-✅ Response: `{"message": "Runner destroyed", "instances": ["i-xxxxxxxxxxxxxxxxx"]}`
-
-**Re-run Job:**
-1. Go to **GitHub → Actions**
-2. Click on your workflow  
-3. Click **"Re-run jobs"** or **"Run workflow"**
-
-**Why Advanced Way is Better:**
-- ⚡ **Automated**: No manual server setup
-- 💰 **Cost-effective**: Auto-destroys to save money
-- 🔄 **On-demand**: Create/destroy as needed
-- 🏗️ **Infrastructure as Code**: Repeatable setup
-
-## ⚡ Example Workflow
-
-The dragon workflow runs cowsay with a dragon:
-```yaml
-name: Cowsay Dragon
-on: workflow_dispatch
-jobs:
-  dragon-job:
-    runs-on: self-hosted
-    steps:
-      - name: Install cowsay
-        run: sudo apt-get install cowsay -y
-      - name: Dragon says hello
-        run: export PATH=$PATH:/usr/games && cowsay -f dragon "Hello from self-hosted runner!"
-```
-
-## 🔧 Setup (One-time)
-
-1. **Configure environment** in `terraform/lambda/.env`:
-   ```bash
-   GITHUB_TOKEN=ghp_your_token_here
-   GITHUB_REPO=KarimZakzouk/self-hosted-dragon-runner
-   AWS_REGION=us-east-1
-   KEY_PAIR_NAME=MyKeyPair
+#### 📋 **Start Runner:**
+1. **Navigate to Runner Settings**
+   ```
+   GitHub Repository → Settings → Actions → Runners
    ```
 
-2. **Deploy infrastructure**:
+2. **Add New Runner**
+   - Click **"New self-hosted runner"**
+   - Select **Linux** as your OS
+   - Copy the provided registration commands
+
+3. **Configure on Your EC2 Instance**
    ```bash
-   cd terraform && terraform apply
+   # SSH into your EC2 instance first
+   ssh -i your-key.pem ubuntu@your-ec2-ip
+   
+   # Example commands from GitHub (yours will be different)
+   mkdir actions-runner && cd actions-runner
+   curl -o actions-runner-linux-x64-2.311.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.311.0/actions-runner-linux-x64-2.311.0.tar.gz
+   tar xzf ./actions-runner-linux-x64-2.311.0.tar.gz
+   ./config.sh --url https://github.com/KarimZakzouk/self-hosted-dragon-runner --token YOUR_TOKEN
+   
+   # Install as a service for always-on operation
+   sudo ./svc.sh install
+   sudo ./svc.sh start
    ```
 
-## 💡 Tips
+#### 🛑 **Stop Runner:**
+1. **Stop the Service**
+   ```bash
+   # SSH into your EC2 instance
+   ssh -i your-key.pem ubuntu@your-ec2-ip
+   
+   # Stop the runner service
+   cd actions-runner
+   sudo ./svc.sh stop
+   ```
 
-- Runner takes ~2-3 minutes to appear in GitHub
-- Runners auto-expire after 60 minutes
-- Always destroy when done to save costs
-- Check GitHub Settings → Actions → Runners for status
+2. **Remove from GitHub**
+   ```
+   GitHub Repository → Settings → Actions → Runners
+   ```
+   - Click the **"..."** menu next to your runner
+   - Select **"Remove"** to unregister
+
+#### 🔄 **Run Your Workflow:**
+1. **Trigger Manually**
+   ```
+   GitHub Repository → Actions → Select Workflow → "Run workflow"
+   ```
+
+2. **Or Push Code Changes**
+   ```bash
+   git add . && git commit -m "trigger workflow" && git push
+   ```
+
+> **💡 Pro Tip:** Since your runner is always on, workflows execute immediately with no cold start delays!
